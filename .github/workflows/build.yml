@@ -62,8 +62,8 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          # 1. Tải công cụ appimagetool chính thức
-          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage"
+          # 1. Tải công cụ appimagetool chính thức (Sử dụng nhánh continuous chống lỗi 404)
+          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
           chmod +x appimagetool
           
           # 2. Tạo cấu trúc thư mục AppDir chuẩn
@@ -84,10 +84,10 @@ jobs:
           Terminal=false
           EOF
           
-          # 5. Tải một Icon mặc định (Bạn có thể đổi link này thành logo của bạn sau)
+          # 5. Tải một Icon mặc định
           wget -O AppDir/app_icon.png "https://cdn-icons-png.flaticon.com/512/2111/2111432.png"
           
-          # 6. Tạo script AppRun (Trái tim của AppImage, chỉ đường đến file chạy)
+          # 6. Tạo script AppRun
           cat <<EOF > AppDir/AppRun
           #!/bin/sh
           HERE="\$(dirname "\$(readlink -f "\${0}")")"
