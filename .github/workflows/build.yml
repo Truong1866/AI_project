@@ -12,6 +12,7 @@ env:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
@@ -45,16 +46,17 @@ jobs:
           uv pip install nuitka zstandard
 
       # Đóng gói bằng Nuitka (Sử dụng uv run để chạy trong môi trường ảo)
+# Đóng gói bằng Nuitka (Sửa lại cú pháp nối dòng)
       - name: Build with Nuitka
-        run: >
-          uv run python -m nuitka 
-                    --assume-yes-for-downloads 
-                    --standalone 
-                    --onefile 
-                    --enable-plugin=pyqt6 
-                    --noinclude-qt-plugins=sensible,bluetooth,qml,webengine,spatialaudio 
-                    --output-dir=dist 
-                    main.py
+        run: |
+          uv run python -m nuitka \
+            --assume-yes-for-downloads \
+            --standalone \
+            --onefile \
+            --enable-plugin=pyqt6 \
+            --noinclude-qt-plugins=sensible,bluetooth,qml,webengine,spatialaudio \
+            --output-dir=dist \
+            main.py
 
       # Tải file thực thi (.exe, .bin) lên GitHub để bạn tải về
       - name: Upload Artifacts
