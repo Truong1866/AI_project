@@ -6,19 +6,20 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
-    # Ma trận giúp chạy đồng thời trên 3 hệ điều hành
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    
+
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
       # Cài đặt thư viện C-headers cho Ubuntu (Tránh lỗi FATAL của Nuitka)
       - name: Install Linux System Dependencies
         if: runner.os == 'Linux'
@@ -47,12 +48,13 @@ jobs:
       - name: Build with Nuitka
         run: >
           uv run python -m nuitka 
-          --standalone 
-          --onefile 
-          --enable-plugin=pyqt6 
-          --noinclude-qt-plugins=sensible,bluetooth,qml,webengine,spatialaudio 
-          --output-dir=dist 
-          main.py
+                    --assume-yes-for-downloads 
+                    --standalone 
+                    --onefile 
+                    --enable-plugin=pyqt6 
+                    --noinclude-qt-plugins=sensible,bluetooth,qml,webengine,spatialaudio 
+                    --output-dir=dist 
+                    main.py
 
       # Tải file thực thi (.exe, .bin) lên GitHub để bạn tải về
       - name: Upload Artifacts
