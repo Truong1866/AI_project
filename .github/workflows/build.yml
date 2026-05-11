@@ -1,6 +1,5 @@
-name: Build Desktop Apps (Nuitka)
+name: Build Desktop Apps
 
-# Kích hoạt khi có code đẩy lên nhánh main hoặc bấm chạy bằng tay
 on:
   push:
     branches: [ "main" ]
@@ -21,33 +20,32 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      # Cài đặt thư viện C-headers cho Ubuntu (Tránh lỗi FATAL của Nuitka)
+
       - name: Install Linux System Dependencies
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y python3-dev
 
-      # Cài đặt uv siêu nhanh bằng action chính thức của Astral
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
 
-      # Thiết lập Python 3.13
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
-      # Dùng uv để cài đặt các thư viện từ requirements.txt và Nuitka
+      # Cài đặt Nuitka và cả PyInstaller
       - name: Install Dependencies
         run: |
           uv venv
           uv pip install -r requirements.txt
-          uv pip install nuitka zstandard
+          uv pip install nuitka zstandard pyinstaller
 
-      # Đóng gói bằng Nuitka (Sử dụng uv run để chạy trong môi trường ảo)
-# Đóng gói bằng Nuitka (Sửa lại cú pháp nối dòng)
-      - name: Build with Nuitka
+      # [DÀNH CHO WINDOWS & LINUX]: Đóng gói bằng Nuitka
+      - name: Build with Nuitka (Windows & Linux)
+        if: runner.os != 'macOS'
+        shell: bash
         run: |
           uv run python -m nuitka \
             --assume-yes-for-downloads \
@@ -58,7 +56,18 @@ jobs:
             --output-dir=dist \
             main.py
 
-      # Tải file thực thi (.exe, .bin) lên GitHub để bạn tải về
+      # [DÀNH RIÊNG CHO MACOS]: Đóng gói bằng PyInstaller để tránh lỗi PyQt6
+      - name: Build with PyInstaller (macOS Fallback)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          uv run pyinstaller \
+            --onefile \
+            --windowed \
+            --distpath dist \
+            main.py
+
+      # Tải toàn bộ kết quả lên Artifacts
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
